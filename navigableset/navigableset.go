@@ -172,7 +172,7 @@ func (n NavigableSet) Lower(element interface{}) interface{} {
 	return nil
 }
 
-// Floor returns the greatest element in this set less than or equal to the given element, or null if there is no such element.
+// Floor returns the greatest element in this set less than or equal to the given element, or nil if there is no such element.
 func (n NavigableSet) Floor(element interface{}) interface{} {
 	if n.comparator == nil {
 		return nil
