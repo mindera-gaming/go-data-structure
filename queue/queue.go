@@ -7,15 +7,20 @@ import (
 )
 
 // Queue represents a data structure that stores a collection of elements held in a sequence.
+// Always try to use the functions provided in this structure.
+//
+// This is a wrapper from the built-in list in Golang.
+// To avoid having problems with this structure,
+// we suggest that you do not manually modify `List` (exposed for iteration purposes only).
 type Queue struct {
-	list       *list.List
+	List       *list.List
 	comparator comparator.Compare
 }
 
 // New returns an initialized queue.
 func New(comparator comparator.Compare) Queue {
 	return Queue{
-		list:       list.New(),
+		List:       list.New(),
 		comparator: comparator,
 	}
 }
@@ -23,30 +28,30 @@ func New(comparator comparator.Compare) Queue {
 // Add inserts the specified element into this queue.
 func (q *Queue) Add(element interface{}) {
 	if q.comparator == nil {
-		q.list.PushBack(element)
+		q.List.PushBack(element)
 		return
 	}
 
-	for e := q.list.Front(); e != nil; e = e.Next() {
+	for e := q.List.Front(); e != nil; e = e.Next() {
 		result := q.comparator(e.Value, element)
 
 		switch result {
 		case comparator.Equal:
-			q.list.InsertAfter(element, e)
+			q.List.InsertAfter(element, e)
 			return
 		case comparator.Less:
 			continue
 		case comparator.Greater:
-			q.list.InsertBefore(element, e)
+			q.List.InsertBefore(element, e)
 			return
 		}
 	}
-	q.list.PushBack(element)
+	q.List.PushBack(element)
 }
 
 // Peek retrieves, but does not remove, the head of this queue, or returns nil if this queue is empty.
 func (q Queue) Peek() interface{} {
-	if head := q.list.Front(); head != nil {
+	if head := q.List.Front(); head != nil {
 		return head.Value
 	}
 	return nil
@@ -54,14 +59,22 @@ func (q Queue) Peek() interface{} {
 
 // Poll retrieves and removes the head of this queue, or returns nil if this queue is empty.
 func (q *Queue) Poll() interface{} {
-	if head := q.list.Front(); head != nil {
-		q.list.Remove(head)
+	if head := q.List.Front(); head != nil {
+		q.List.Remove(head)
 		return head
 	}
 	return nil
 }
 
+// Remove removes the specified (list.)element from this queue.
+// Returns false if the operation is not successful.
+func (q *Queue) Remove(element *list.Element) {
+	if element != nil {
+		q.List.Remove(element)
+	}
+}
+
 // Len returns the number of elements in the queue.
 func (q Queue) Len() int {
-	return q.list.Len()
+	return q.List.Len()
 }
