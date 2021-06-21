@@ -8,8 +8,13 @@ import (
 )
 
 // NavigableSet represents a data structure that stores ordered elements with navigation methods.
+// Always try to use the functions provided in this structure.
+//
+// This is a wrapper from the built-in list in Golang.
+// To avoid having problems with this structure,
+// we suggest that you do not manually modify `List` (exposed for iteration purposes only).
 type NavigableSet struct {
-	list       *list.List
+	List       *list.List
 	comparator comparator.Compare
 }
 
@@ -20,7 +25,7 @@ func New(comparator comparator.Compare) (NavigableSet, error) {
 	}
 
 	return NavigableSet{
-		list:       list.New(),
+		List:       list.New(),
 		comparator: comparator,
 	}, nil
 }
@@ -32,7 +37,7 @@ func (n *NavigableSet) Add(element interface{}) bool {
 		return false
 	}
 
-	for e := n.list.Front(); e != nil; e = e.Next() {
+	for e := n.List.Front(); e != nil; e = e.Next() {
 		result := n.comparator(e.Value, element)
 
 		switch result {
@@ -41,11 +46,11 @@ func (n *NavigableSet) Add(element interface{}) bool {
 		case comparator.Less:
 			continue
 		case comparator.Greater:
-			n.list.InsertBefore(element, e)
+			n.List.InsertBefore(element, e)
 			return true
 		}
 	}
-	n.list.PushBack(element)
+	n.List.PushBack(element)
 	return true
 }
 
@@ -56,12 +61,12 @@ func (n *NavigableSet) Remove(element interface{}) bool {
 		return false
 	}
 
-	for e := n.list.Front(); e != nil; e = e.Next() {
+	for e := n.List.Front(); e != nil; e = e.Next() {
 		result := n.comparator(e.Value, element)
 
 		switch result {
 		case comparator.Equal:
-			n.list.Remove(e)
+			n.List.Remove(e)
 			return true
 		case comparator.Less:
 			continue
@@ -78,7 +83,7 @@ func (n NavigableSet) Contains(element interface{}) bool {
 		return false
 	}
 
-	for e := n.list.Front(); e != nil; e = e.Next() {
+	for e := n.List.Front(); e != nil; e = e.Next() {
 		result := n.comparator(e.Value, element)
 
 		switch result {
@@ -95,7 +100,7 @@ func (n NavigableSet) Contains(element interface{}) bool {
 
 // First returns the first (lowest) element currently in this set or nil if there are no elements.
 func (n NavigableSet) First() interface{} {
-	if first := n.list.Front(); first != nil {
+	if first := n.List.Front(); first != nil {
 		return first.Value
 	}
 	return nil
@@ -103,7 +108,7 @@ func (n NavigableSet) First() interface{} {
 
 // Last returns the last (highest) element currently in this set or nil if there are no elements.
 func (n NavigableSet) Last() interface{} {
-	if last := n.list.Back(); last != nil {
+	if last := n.List.Back(); last != nil {
 		return last.Value
 	}
 	return nil
@@ -115,12 +120,15 @@ func (n NavigableSet) Higher(element interface{}) interface{} {
 		return nil
 	}
 
-	for e := n.list.Front(); e != nil; e = e.Next() {
+	for e := n.List.Front(); e != nil; e = e.Next() {
 		result := n.comparator(e.Value, element)
 
 		switch result {
 		case comparator.Equal:
-			return e.Next().Value
+			if next := e.Next(); next != nil {
+				return next.Value
+			}
+			return nil
 		case comparator.Less:
 			continue
 		case comparator.Greater:
@@ -136,7 +144,7 @@ func (n NavigableSet) Ceiling(element interface{}) interface{} {
 		return nil
 	}
 
-	for e := n.list.Front(); e != nil; e = e.Next() {
+	for e := n.List.Front(); e != nil; e = e.Next() {
 		result := n.comparator(e.Value, element)
 
 		switch result {
@@ -157,12 +165,15 @@ func (n NavigableSet) Lower(element interface{}) interface{} {
 		return nil
 	}
 
-	for e := n.list.Back(); e != nil; e = e.Prev() {
+	for e := n.List.Back(); e != nil; e = e.Prev() {
 		result := n.comparator(e.Value, element)
 
 		switch result {
 		case comparator.Equal:
-			return e.Prev().Value
+			if prev := e.Prev(); prev != nil {
+				return prev.Value
+			}
+			return nil
 		case comparator.Less:
 			return e.Value
 		case comparator.Greater:
@@ -178,7 +189,7 @@ func (n NavigableSet) Floor(element interface{}) interface{} {
 		return nil
 	}
 
-	for e := n.list.Back(); e != nil; e = e.Prev() {
+	for e := n.List.Back(); e != nil; e = e.Prev() {
 		result := n.comparator(e.Value, element)
 
 		switch result {
@@ -199,7 +210,7 @@ func (n NavigableSet) TailSet(fromElement interface{}, inclusive bool) (set []in
 		return nil
 	}
 
-	for e := n.list.Front(); e != nil; e = e.Next() {
+	for e := n.List.Front(); e != nil; e = e.Next() {
 		result := n.comparator(e.Value, fromElement)
 
 		switch result {
@@ -222,7 +233,7 @@ func (n NavigableSet) Headset(fromElement interface{}, inclusive bool) (set []in
 		return nil
 	}
 
-	for e := n.list.Back(); e != nil; e = e.Prev() {
+	for e := n.List.Back(); e != nil; e = e.Prev() {
 		result := n.comparator(e.Value, fromElement)
 
 		switch result {
@@ -241,7 +252,7 @@ func (n NavigableSet) Headset(fromElement interface{}, inclusive bool) (set []in
 
 // DescendingSet returns a reverse order view of the elements contained in this set.
 func (n NavigableSet) DescendingSet() (set []interface{}) {
-	for e := n.list.Back(); e != nil; e = e.Prev() {
+	for e := n.List.Back(); e != nil; e = e.Prev() {
 		set = append(set, e.Value)
 	}
 	return
@@ -249,5 +260,5 @@ func (n NavigableSet) DescendingSet() (set []interface{}) {
 
 // Len returns the number of elements in the set.
 func (n NavigableSet) Len() int {
-	return n.list.Len()
+	return n.List.Len()
 }
