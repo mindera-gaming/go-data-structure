@@ -7,7 +7,10 @@ import (
 // Reverse reverses the order of a slice.
 func Reverse(slice interface{}) {
 	value := reflect.ValueOf(slice)
-	if value.IsNil() || value.Kind() != reflect.Slice {
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Slice {
 		return
 	}
 
