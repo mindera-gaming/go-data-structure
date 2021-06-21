@@ -5,6 +5,8 @@ import (
 )
 
 // Reverse reverses the order of a slice.
+// Keep in mind that this function uses reflection,
+// if performance is your priority, please make your own function.
 func Reverse(slice interface{}) {
 	value := reflect.ValueOf(slice)
 	if value.Kind() == reflect.Ptr {
