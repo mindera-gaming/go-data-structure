@@ -61,17 +61,19 @@ func (q Queue) Peek() interface{} {
 func (q *Queue) Poll() interface{} {
 	if head := q.List.Front(); head != nil {
 		q.List.Remove(head)
-		return head
+		return head.Value
 	}
 	return nil
 }
 
 // Remove removes the specified (list.)element from this queue.
 // Returns false if the operation is not successful.
-func (q *Queue) Remove(element *list.Element) {
+func (q *Queue) Remove(element *list.Element) bool {
 	if element != nil {
-		q.List.Remove(element)
+		return false
 	}
+	q.List.Remove(element)
+	return true
 }
 
 // Len returns the number of elements in the queue.
